@@ -1,16 +1,14 @@
 const express = require("express")
 const router = express.Router()
 
-const data = {
-    "data": {
-      "name": "Abduljelili Osigbemhe Umaru",
-      "github": "@jelhill",
-      "email": "talk2jelili2000@gmail.com",
-      "mobile": "08036792165",
-      "twitter": "@jelhill"
-    }
-  }
 
+  let data = {
+    "name": "Abduljelili Osigbemhe Umaru",
+    "github": "@jelhill",
+    "email": "talk2jelili2000@gmail.com",
+    "mobile": "08036792165",
+    "twitter": "@jelhill"
+  }
 
 valData = {
     "rule": {
