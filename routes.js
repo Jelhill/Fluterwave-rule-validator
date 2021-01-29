@@ -21,8 +21,10 @@ router.get("/", (req, res) => {
 
 router.post("/validate-rule", (req, res) => {
 
-  if(Array.isArray(req.body)) {
-    return res.json({
+  if(Array.isArray(req.body) || typeof req.body === "number" || typeof req.body === "string") {
+    return res
+    .status(400)
+    .json({
       message: "Invalid JSON payload passed.",
       status: "error",
       data: null
@@ -32,7 +34,9 @@ router.post("/validate-rule", (req, res) => {
 
   if(typeof req.body !== "object") {
     if(Array.isArray(req.body)){
-      return res.json({
+      return res
+      .status(400)
+      .json({
         message: "Invalid JSON payload passed.",
         status: "error",
         data: null
@@ -41,16 +45,18 @@ router.post("/validate-rule", (req, res) => {
   }
 
 
-  if(req.body.rule === undefined && req.body.data === undefined) {
-    return res.json({
-      message: "rule and data is required.",
-      status: "error",
-      data: null
-    })      
-  }
+  // if(req.body.rule === undefined && req.body.data === undefined) {
+  //   return res.json({
+  //     message: "rule and data is required.",
+  //     status: "error",
+  //     data: null
+  //   })      
+  // }
   
   if(req.body.data === undefined) {
-    return res.json({
+    return res
+      .status(400)
+      .json({
       message: "data is required.",
       status: "error",
       data: null
@@ -58,14 +64,16 @@ router.post("/validate-rule", (req, res) => {
   }
   
   if(req.body.rule === undefined) {
-    return res.json({
+    return res
+      .status(400)
+      .json({
       message: "rule is required.",
       status: "error",
       data: null
     })      
   }
   
-  if( Array.isArray(req.body.rule)) {
+  if(Array.isArray(req.body.rule)) {
     return res.json({
       message: "rule should be an object",
       status: "error",
@@ -87,18 +95,20 @@ router.post("/validate-rule", (req, res) => {
   let condition_value = req.body.rule.condition_value
 
   
-    if(Array.isArray(req.body.data)) {
-      field_value = req.body.data
-      if(fieldToArray.length > 1) {
-        return res
-          .status(400)
-          .json({
-            message: `${fieldToArray[0]} should be an object.`,
-            status: "error",
-            data: null
-          })
-      }
-    }
+
+
+    // if(typeof req.body.data === "string") {
+    //   field_value = req.body.data    
+    //   if(fieldToArray.length > 1) {
+    //     return res
+    //       .status(400)
+    //       .json({
+    //         message: `${fieldToArray[0]} should be an object.`,
+    //         status: "error",
+    //         data: null
+    //       })
+    //   }
+    // }
     
 
     // Validate rules fields
@@ -112,7 +122,6 @@ router.post("/validate-rule", (req, res) => {
       }
     })
 
-
     if(missingRuleField.length) {
       return res
         .status(400)
@@ -122,14 +131,41 @@ router.post("/validate-rule", (req, res) => {
         data: null
     })
     }
-    
-    if(Array.isArray(req.body.data) === false && fieldToArray.length === 1 && !Object.keys(req.body.data).includes(fieldToArray[0])) {
-      return res.status(400).json({
-        message: `field ${fieldToArray[0]} is missing from data.`,
-        status: "error",
-        data: null
-      })
+
+    if(Array.isArray(req.body.data) || typeof req.body.data === "string") {
+      field_value = req.body.data
+      if(fieldToArray.length === 1 ) {
+
+        console.log("I ran now", fieldToArray[0], req.body.data)
+        console.log("I ran", req.body.data.includes(fieldToArray[0]))
+        if(!req.body.data.includes(fieldToArray[0])){
+          return res
+            .status(400)
+            .json({
+              message: `field ${fieldToArray[0]} is missing from data.`,
+              status: "error",
+              data: null
+            })
+        }
+      }
+      // if(fieldToArray.length > 1) {
+      //   return res
+      //     .status(400)
+      //     .json({
+      //       message: `${fieldToArray[0]} should be an object.`,
+      //       status: "error",
+      //       data: null
+      //     })
+      // }
     }
+    
+    // if(Array.isArray(req.body.data) === false && fieldToArray.length === 1 && !Object.keys(req.body.data).includes(fieldToArray[0])) {
+    //   return res.status(400).json({
+    //     message: `field ${fieldToArray[0]} is missing from data.`,
+    //     status: "error",
+    //     data: null
+    //   })
+    // }
 
     if(Array.isArray(req.body.data) && fieldToArray.length === 1 && !req.body.data.includes(fieldToArray[0])) {
       return res.status(400).json({
@@ -139,12 +175,14 @@ router.post("/validate-rule", (req, res) => {
       })
     }
 
-    if(fieldToArray.length > 1 && !Object.keys(req.body.data[fieldToArray[0]]).includes(fieldToArray[1])) {
-      return res.status(400).json({
-        message: `field ${fieldToArray[1]} is missing from data.`,
-        status: "error",
-        data: null
-      })
+    if(fieldToArray.length > 1 && Array.isArray(req.body.data) === false && typeof req.body.data !== "string") {
+      if(!Object.keys(req.body.data[fieldToArray[0]]).includes(fieldToArray[1])) {
+        return res.status(400).json({
+          message: `field ${fieldToArray[1]} is missing from data.`,
+          status: "error",
+          data: null
+        })
+      }
     }
 
     // Check to see if the field Matches the data.field.
@@ -162,11 +200,11 @@ router.post("/validate-rule", (req, res) => {
       }
     }
 
-    if(fieldToArray.length === 1 && !Array.isArray(req.body.data)) {
+    if(fieldToArray.length === 1 && !Array.isArray(req.body.data) && typeof req.body.data !== "string") {
       field_value = req.body.data[fieldToArray[0]]
     }
     
-    if(fieldToArray.length === 2 && !Array.isArray(req.body.data)) {
+    if(fieldToArray.length === 2 && !Array.isArray(req.body.data) && typeof req.body.data !== "string") {
       field_value = req.body.data[fieldToArray[0]][fieldToArray[1]]
     }
 
@@ -208,7 +246,7 @@ router.post("/validate-rule", (req, res) => {
       })
     }
 
-    res.status(200)
+    return res.status(200)
     .json({
       message: `field ${req.body.rule.field} successfully validated.`,
       status: "success",
