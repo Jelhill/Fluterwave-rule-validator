@@ -114,8 +114,6 @@ router.post("/validate-rule", (req, res) => {
       field_value = req.body.data
       if(fieldToArray.length === 1 ) {
 
-        console.log("I ran now", fieldToArray[0], req.body.data)
-        console.log("I ran", req.body.data.includes(fieldToArray[0]))
         if(!req.body.data.includes(fieldToArray[0])){
           return res
             .status(400)
@@ -129,7 +127,9 @@ router.post("/validate-rule", (req, res) => {
     }
     
     if(Array.isArray(req.body.data) && fieldToArray.length === 1 && !req.body.data.includes(fieldToArray[0])) {
-      return res.status(400).json({
+      return res
+      .status(400)
+      .json({
         message: `field ${fieldToArray[0]} is missing from data.`,
         status: "error",
         data: null
@@ -138,7 +138,9 @@ router.post("/validate-rule", (req, res) => {
 
     if(fieldToArray.length > 1 && Array.isArray(req.body.data) === false && typeof req.body.data !== "string") {
       if(!Object.keys(req.body.data[fieldToArray[0]]).includes(fieldToArray[1])) {
-        return res.status(400).json({
+        return res
+        .status(400)
+        .json({
           message: `field ${fieldToArray[1]} is missing from data.`,
           status: "error",
           data: null
